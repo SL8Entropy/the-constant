@@ -10,14 +10,17 @@ public class Player : MonoBehaviour
     [SerializeField] private int gravityScale = 3;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask clingLayer;
+    [SerializeField] private LayerMask bashLayer;
     private bool isClinging;
     private bool canDoubleJump;
     private float clingLayerIndex;
+    private float bashLayerIndex;
     private int clingDirection;
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         clingLayerIndex = Mathf.Log(clingLayer.value, 2f);
+        bashLayerIndex = Mathf.Log(bashLayer.value, 2f);
     }
 
     private void Update()
@@ -39,7 +42,9 @@ public class Player : MonoBehaviour
     private void HandleJump()
     {
         
-        
+        if(Input.GetButtonUp("Fire1")){
+            Time.timeScale = 1;
+        }
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -94,8 +99,20 @@ public class Player : MonoBehaviour
                 }
             }
         }
+        
+        
     }
+    private void OnTriggerStay2D(Collider2D col){
+        var layerMask = col.gameObject.layer;
+        if (Input.GetButton("Fire1")){
+            if(layerMask == bashLayerIndex){
+                body.MovePosition((Vector2)col.transform.position + new Vector2(0,2)); // Moves the player up by 10 units
+                Time.timeScale = 0.5f;
+                
 
+            }
+        }
+    }
 
     private void OnCollisionExit2D(Collision2D collision){
         var layerMask = collision.gameObject.layer;
