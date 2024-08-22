@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 416388273}
   - component: {fileID: 416388274}
   - component: {fileID: 416388276}
+  - component: {fileID: 416388277}
   - component: {fileID: 416388275}
   m_Layer: 0
   m_Name: Player
@@ -268,7 +269,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 1
   m_AngularDrag: 0.05
   m_GravityScale: 3
   m_Material: {fileID: 0}
@@ -307,7 +308,7 @@ MonoBehaviour:
   bashLayer:
     serializedVersion: 2
     m_Bits: 1024
-  bashSpeed: 10
+  bashSpeed: 20
 --- !u!61 &416388276
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -353,6 +354,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 5, y: 5}
   m_EdgeRadius: 0
+--- !u!114 &416388277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 416388270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecdea6b943f81964fb177ae8412ce18c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  arrowPrefab: {fileID: 6349096741275745399, guid: 402d1e31a89ebaf4a8b4286841d21487, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -883,7 +897,7 @@ PlatformEffector2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1415516023}
-  m_Enabled: 1
+  m_Enabled: 0
   m_UseColliderMask: 1
   m_ColliderMask:
     serializedVersion: 2
