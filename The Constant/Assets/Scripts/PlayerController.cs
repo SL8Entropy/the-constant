@@ -20,7 +20,6 @@ public class Player : MonoBehaviour
     private int clingDirection;
     public bool isBashing { get; private set; }
     public Collider2D bashCol { get; private set; }
-
     private Vector2 bashDirection; // Direction of the bash
     private float timeScale = 0.2f; //the time scale you want to slow down time by when you bash
 
@@ -35,7 +34,6 @@ public class Player : MonoBehaviour
     {
         HandleMovement();
         HandleJump();
-        HandleBash();
     }
 
     private void HandleMovement()
@@ -56,11 +54,19 @@ public class Player : MonoBehaviour
             {
                 isBashing = false;
 
-                // Teleport to the bashable object
-                body.MovePosition(bashCol.transform.position);
+                // Calculate the point on the edge of the bashable object collider in the direction of bashDirection
+                Vector2 bashColPosition = bashCol.transform.position;
+                Vector2 closestPoint = bashCol.ClosestPoint(bashColPosition + bashDirection.normalized * 10f); // Multiply by a large value to ensure it goes to the edge
+
+                // Teleport the player to this point
+                body.MovePosition(closestPoint);
 
                 // Launch in the chosen direction
                 body.velocity = bashDirection * bashSpeed;
+
+
+                //reset double jump
+                canDoubleJump = true;
             }
         }
 
@@ -88,18 +94,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleBash()
-    {
-        if (Input.GetButton("Fire1") && bashCol != null)
-        {
-            Time.timeScale = timeScale;
-            isBashing = true;
 
-            // Calculate direction from player to mouse cursor
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            bashDirection = (mousePos - (Vector2)bashCol.transform.position).normalized;
-        }
-    }
 
     private bool IsGrounded()
     {
@@ -139,7 +134,11 @@ public class Player : MonoBehaviour
             {
                 bashCol = col;
                 Time.timeScale = timeScale;
+                Time.timeScale = timeScale;
                 isBashing = true;
+                // Calculate direction from player to mouse cursor
+                Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                bashDirection = (mousePos - (Vector2)bashCol.transform.position).normalized;
             }
         }
     }
@@ -151,6 +150,12 @@ public class Player : MonoBehaviour
         {
             isClinging = false;
             body.gravityScale = gravityScale;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D col){
+        var layerMask = col.gameObject.layer;
+        if(layerMask == bashLayerIndex){
+
         }
     }
 }
