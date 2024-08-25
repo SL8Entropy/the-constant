@@ -129,7 +129,7 @@ public class Player : MonoBehaviour
         dashCooldownTimer = dashCooldown;
         body.gravityScale = 0;
         float horizontalInput = Input.GetAxis("Horizontal");
-        body.velocity = new Vector2(horizontalInput * dashSpeed, body.velocity.y);
+        body.velocity = new Vector2(horizontalInput * dashSpeed, 0);
     }
 
     private void EndDash()
@@ -147,6 +147,20 @@ public class Player : MonoBehaviour
         body.MovePosition(closestPoint);
         body.velocity = bashDirection * bashSpeed;
         canDoubleJump = true;
+        if(bashCol.gameObject.CompareTag("enemy")){
+            // Get the EnemyGrunt component from the collided object
+            EnemyGrunt enemy = bashCol.gameObject.GetComponent<EnemyGrunt>();
+
+            // If the enemy component is found, call TakeDamage()
+            if (enemy != null)
+            {
+                enemy.TakeDamage();
+            }
+        }
+        else if(bashCol.gameObject.CompareTag("projectile")){
+            Projectile projectile = bashCol.gameObject.GetComponent<Projectile>();
+            projectile.rb.velocity = bashDirection*-1*projectile.projectileSpeed;
+        }
     }
 
     private bool IsGrounded()
