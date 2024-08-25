@@ -5,26 +5,36 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private Rigidbody2D body;
+    private PlayerHealth playerHealth;
+
     [SerializeField] private int speed = 10;
-    [SerializeField] private int acceleration = 10;
     [SerializeField] private int jumpSpeed = 10;
     [SerializeField] private int gravityScale = 3;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask clingLayer;
     [SerializeField] private LayerMask bashLayer;
     [SerializeField] private int bashSpeed;
-    private bool isClinging;
-    private bool canDoubleJump;
+    [SerializeField] private float dashSpeed = 15f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 1f;
+
+    private bool isClinging = false;
+    private bool canDoubleJump = false;
+    private bool isDashing = false;
+    public bool isBashing { get; private set; } // Make this public for access
+    private int clingDirection = 0;
     private float clingLayerIndex;
     private float bashLayerIndex;
-    private int clingDirection;
-    public bool isBashing { get; private set; }
+    private float dashTimeLeft = 0f;
+    private float dashCooldownTimer = 0f;
+    private Vector2 bashDirection;
+    private float timeScale = 0.2f; // Time scale when bashing
+
     public Collider2D bashCol { get; private set; }
-    private Vector2 bashDirection; // Direction of the bash
-    private float timeScale = 0.2f; //the time scale you want to slow down time by when you bash
 
     private void Awake()
     {
+        playerHealth = FindObjectOfType<PlayerHealth>();
         body = GetComponent<Rigidbody2D>();
         clingLayerIndex = Mathf.Log(clingLayer.value, 2f);
         bashLayerIndex = Mathf.Log(bashLayer.value, 2f);
@@ -32,44 +42,32 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        HandleMovement();
-        HandleJump();
+        if (isDashing)
+        {
+            HandleDash();
+        }
+        else
+        {
+            HandleMovement();
+            HandleJump();
+            HandleDashInput(); // Only handle dash input when not already dashing
+        }
     }
 
     private void HandleMovement()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        if (horizontalInput != 0 && !isClinging && IsGrounded())
+        if (!playerHealth.immune && !isClinging)
         {
-            body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
+            float horizontalInput = Input.GetAxis("Horizontal");
+            if (horizontalInput != 0 && IsGrounded())
+            {
+                body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
+            }
         }
     }
 
     private void HandleJump()
     {
-        if (Input.GetButtonUp("Fire1"))
-        {
-            Time.timeScale = 1;
-            if (isBashing)
-            {
-                isBashing = false;
-
-                // Calculate the point on the edge of the bashable object collider in the direction of bashDirection
-                Vector2 bashColPosition = bashCol.transform.position;
-                Vector2 closestPoint = bashCol.ClosestPoint(bashColPosition + bashDirection.normalized * 10f); // Multiply by a large value to ensure it goes to the edge
-
-                // Teleport the player to this point
-                body.MovePosition(closestPoint);
-
-                // Launch in the chosen direction
-                body.velocity = bashDirection * bashSpeed;
-
-
-                //reset double jump
-                canDoubleJump = true;
-            }
-        }
-
         if (Input.GetButtonDown("Jump"))
         {
             if (isClinging)
@@ -92,9 +90,64 @@ public class Player : MonoBehaviour
                 canDoubleJump = false;
             }
         }
+
+        if (Input.GetButtonUp("Fire2"))
+        {
+            if (isBashing)
+            {
+                EndBash();
+            }
+        }
     }
 
+    private void HandleDashInput()
+    {
+        if (Input.GetButtonDown("Fire1") && dashCooldownTimer <= 0)
+        {
+            StartDash();
+        }
 
+        if (dashCooldownTimer > 0)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+    }
+
+    private void HandleDash()
+    {
+        dashTimeLeft -= Time.deltaTime;
+        if (dashTimeLeft <= 0)
+        {
+            EndDash();
+        }
+    }
+
+    private void StartDash()
+    {
+        isDashing = true;
+        dashTimeLeft = dashDuration;
+        dashCooldownTimer = dashCooldown;
+        body.gravityScale = 0;
+        float horizontalInput = Input.GetAxis("Horizontal");
+        body.velocity = new Vector2(horizontalInput * dashSpeed, body.velocity.y);
+    }
+
+    private void EndDash()
+    {
+        isDashing = false;
+        body.gravityScale = gravityScale;
+    }
+
+    private void EndBash()
+    {
+        isBashing = false;
+        Time.timeScale = 1f;
+
+        Vector2 closestPoint = bashCol.ClosestPoint((Vector2)bashCol.transform.position + bashDirection * 10f); // Convert Vector3 to Vector2
+        body.MovePosition(closestPoint);
+        body.velocity = bashDirection * bashSpeed;
+        canDoubleJump = true;
+    }
 
     private bool IsGrounded()
     {
@@ -103,59 +156,34 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        var layerMask = collision.gameObject.layer;
-        if (layerMask == clingLayerIndex)
+        if (collision.gameObject.layer == clingLayerIndex)
         {
             isClinging = true;
-            body.velocity = new Vector2(0, 0);
+            body.velocity = Vector2.zero;
             body.gravityScale = 0;
-            foreach (ContactPoint2D contact in collision.contacts)
-            {
-                Vector2 collisionNormal = contact.normal;
-
-                if (collisionNormal.x > 0.5f)
-                {
-                    clingDirection = -1;
-                }
-                else if (collisionNormal.x < -0.5f)
-                {
-                    clingDirection = 1;
-                }
-            }
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D col)
-    {
-        var layerMask = col.gameObject.layer;
-        if (Input.GetButton("Fire1"))
-        {
-            if (layerMask == bashLayerIndex)
-            {
-                bashCol = col;
-                Time.timeScale = timeScale;
-                Time.timeScale = timeScale;
-                isBashing = true;
-                // Calculate direction from player to mouse cursor
-                Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                bashDirection = (mousePos - (Vector2)bashCol.transform.position).normalized;
-            }
+            clingDirection = (collision.contacts[0].normal.x > 0.5f) ? -1 : 1;
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        var layerMask = collision.gameObject.layer;
-        if (layerMask == clingLayerIndex)
+        if (collision.gameObject.layer == clingLayerIndex)
         {
             isClinging = false;
             body.gravityScale = gravityScale;
         }
     }
-    private void OnTriggerExit2D(Collider2D col){
-        var layerMask = col.gameObject.layer;
-        if(layerMask == bashLayerIndex){
 
+    private void OnTriggerStay2D(Collider2D col)
+    {
+        if (Input.GetButton("Fire2") && col.gameObject.layer == bashLayerIndex)
+        {
+            bashCol = col;
+            Time.timeScale = timeScale;
+            isBashing = true;
+
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            bashDirection = (mousePos - (Vector2)bashCol.transform.position).normalized;
         }
     }
 }
