@@ -149,7 +149,7 @@ public class Player : MonoBehaviour
         canDoubleJump = true;
         if(bashCol.gameObject.CompareTag("enemy")){
             // Get the EnemyGrunt component from the collided object
-            EnemyGrunt enemy = bashCol.gameObject.GetComponent<EnemyGrunt>();
+            EnemyClass enemy = bashCol.gameObject.GetComponent<EnemyClass>();
 
             // If the enemy component is found, call TakeDamage()
             if (enemy != null)
