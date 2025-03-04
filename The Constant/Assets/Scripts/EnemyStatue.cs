@@ -14,14 +14,16 @@ public class EnemyStatue : EnemyClass
     private bool isHiding = false; // Whether the statue is currently hiding
     private float xSize;
 
+    public Vector2 shootDirection = Vector2.right; // The direction in which the statue can shoot
+
     void Update()
     {
-        // Check if the enemy should shoot a projectile
-        HandleShooting();
+        if (isDying) return; 
 
-        // Check if the enemy should hide or come out of hiding
+        HandleShooting();
         HandleHiding();
     }
+
     override public void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -29,73 +31,65 @@ public class EnemyStatue : EnemyClass
         xSize = rb.transform.lossyScale.x;
     }
 
-    // Method to handle shooting logic
     private void HandleShooting()
     {
-        // Check if the player is within range and the cooldown period has passed
-        if (Mathf.Abs(rb.transform.position.x - player.transform.position.x) <= 10 && Time.time >= nextShootTime && !isHiding)
+        Vector2 toPlayer = (player.transform.position - rb.transform.position).normalized;
+
+        // Check if the player is in the correct direction and within range
+        if (Vector2.Dot(toPlayer, shootDirection) > 0.7f && Mathf.Abs(rb.transform.position.x - player.transform.position.x) <= 10 && Time.time >= nextShootTime && !isHiding)
         {
             ShootProjectile();
         }
     }
 
-    // Method to shoot a projectile
     private void ShootProjectile()
     {
-        // Calculate the spawn position for the projectile
-        Vector3 spawnPosition = rb.transform.position + new Vector3(0.8f, 0.0f, 0.0f);
-
-        // Instantiate the projectile at the new position
+        Vector3 spawnPosition = rb.transform.position + new Vector3(shootDirection.x * 0.8f, shootDirection.y * 0.8f, 0.0f);
         projectileInstance = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
 
-        // Set the projectile's direction and speed
         Projectile projectileComponent = projectileInstance.GetComponent<Projectile>();
         if (projectileComponent != null)
         {
-            projectileComponent.projectileDirection = new Vector2(1, 0).normalized;
+            projectileComponent.projectileDirection = shootDirection.normalized;
             projectileComponent.Awake();
         }
 
-        // Set the next shoot time based on the cooldown
         nextShootTime = Time.time + shootCooldown;
     }
 
-    // Method to handle hiding logic
     private void HandleHiding()
     {
         if (isHiding)
         {
-            // Check if the hide duration has elapsed
             if (Time.time >= hideStartTime + hideDuration)
             {
-                // Unhide the enemy
                 Unhide();
             }
         }
         else
         {
-            // Check if the visible duration has elapsed
             if (Time.time >= hideStartTime + visibleDuration)
             {
-                // Hide the enemy
                 Hide();
             }
         }
     }
 
-    // Method to hide the enemy
     private void Hide()
     {
         rb.transform.localScale = new Vector3(0, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
         isHiding = true;
-        hideStartTime = Time.time; // Start hiding timer
+        hideStartTime = Time.time;
     }
 
-    // Method to unhide the enemy
     private void Unhide()
     {
         rb.transform.localScale = new Vector3(xSize, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
         isHiding = false;
-        hideStartTime = Time.time; // Start visible timer
+        hideStartTime = Time.time;
+    }
+    override public IEnumerator FlashBeforeDestroy(){
+        yield return new WaitForSeconds(flashSpeed);
+
     }
 }

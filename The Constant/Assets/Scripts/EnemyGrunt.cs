@@ -11,7 +11,8 @@ public class EnemyGrunt : EnemyClass
 
     // Update is called once per frame
     void Update()
-    {
+    {   
+        if(isDying) return;
         // Move enemy towards the player with a slight offset
         enemyDirection = new Vector2(player.transform.position.x - rb.transform.position.x, 5 + player.transform.position.y - rb.transform.position.y);
         rb.linearVelocity = enemyDirection.normalized * enemySpeed;

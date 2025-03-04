@@ -50,8 +50,9 @@ public class PlayerHealth : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (!immune && (collision.gameObject.CompareTag("enemy") || collision.gameObject.CompareTag("projectile")))
+    {   EnemyClass enemyComponent = collision.gameObject.GetComponent<EnemyClass>();
+
+        if (!immune && ((collision.gameObject.CompareTag("enemy")&& enemyComponent != null && !enemyComponent.isDying) || collision.gameObject.CompareTag("projectile")))
         {
             if(player.isBashing){
                 player.EndBash(0);

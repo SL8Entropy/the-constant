@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3363208921716939734}
   - component: {fileID: 8191296056556099217}
   - component: {fileID: 3740018400490373809}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: enemyDasher
   m_TagString: enemy
   m_Icon: {fileID: 0}
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 5226722382821930160}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.48, y: -0.66, z: 0}
+  m_LocalPosition: {x: 4.48, y: -1.32, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -116,7 +116,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5226722382821930160}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

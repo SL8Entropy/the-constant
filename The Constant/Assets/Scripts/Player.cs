@@ -72,6 +72,9 @@ public class Player : MonoBehaviour
                 body.linearVelocity = new Vector2(horizontalInput * speed, body.linearVelocity.y);
             }
         }
+        if(body.position.y<=-10){
+            playerHealth.changeHealth(-1);
+        }
     }
 
     private void HandleJump()

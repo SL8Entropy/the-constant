@@ -4,10 +4,11 @@ public class PauseResume : MonoBehaviour
 {
     private bool isPaused = false;
     public GameObject pauseMenue;
-
+    public GameObject pauseText;
     void Awake()
     {
         pauseMenue.SetActive(false);
+        pauseText.SetActive(false);
     }
     void Update()
     {
@@ -25,12 +26,14 @@ public class PauseResume : MonoBehaviour
         if (isPaused)
         {
             pauseMenue.SetActive(true);
+            pauseText.SetActive(true);
 
             PauseGame();
         }
         else
         {
             pauseMenue.SetActive(false);
+            pauseText.SetActive(false);
 
             ResumeGame();
         }
@@ -46,6 +49,15 @@ public class PauseResume : MonoBehaviour
     {
         Time.timeScale = 1f;  // Resumes game time
         Debug.Log("Game Resumed");
+    }
+
+    public void ExitGame(){
+        Application.Quit();
+        
+        // Just to confirm in the editor
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #endif
     }
 }
 
