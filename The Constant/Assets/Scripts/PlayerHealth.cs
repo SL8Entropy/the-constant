@@ -16,6 +16,8 @@ public class PlayerHealth : MonoBehaviour
 
     public GameObject gameOverScreen;
     public GameObject gameOverText;
+    public GameObject timer;
+    private timerScript timerScriptref;
     private void Awake()
     {
         player = Object.FindFirstObjectByType<Player>();
@@ -24,6 +26,8 @@ public class PlayerHealth : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
         gameOverScreen.SetActive(false);
         gameOverText.SetActive(false);
+        timerScriptref = timer.GetComponent<timerScript>(); // Get the timer script reference
+
 
     }
 
@@ -90,8 +94,9 @@ public class PlayerHealth : MonoBehaviour
 private void GameOver()
 {
     player.enabled = false;  
-    gameOverScreen.SetActive(true); 
+    gameOverScreen.SetActive(true);
     gameOverText.SetActive(true); 
+    timerScriptref.StopTimer();
 }
 
 }
