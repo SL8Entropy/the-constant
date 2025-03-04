@@ -27,7 +27,7 @@ public abstract class EnemyClass : MonoBehaviour
         }
     }
 
-    public void TakeDamage()
+    public virtual void TakeDamage()
     {
         enemyHealth -= 1;
 
@@ -40,7 +40,7 @@ public abstract class EnemyClass : MonoBehaviour
         }
     }
 
-    public virtual IEnumerator FlashBeforeDestroy()
+    public IEnumerator FlashBeforeDestroy()
     {
         float elapsedTime = 0f;
         Color originalColor = spriteRenderer.color;

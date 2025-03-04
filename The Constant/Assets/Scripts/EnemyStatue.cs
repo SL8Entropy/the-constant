@@ -88,8 +88,11 @@ public class EnemyStatue : EnemyClass
         isHiding = false;
         hideStartTime = Time.time;
     }
-    override public IEnumerator FlashBeforeDestroy(){
-        yield return new WaitForSeconds(flashSpeed);
-
+    public override void TakeDamage()
+    {
+        enemyHealth+=(-1);
+        if(enemyHealth<=0){
+            Destroy(gameObject);
+        }
     }
 }
