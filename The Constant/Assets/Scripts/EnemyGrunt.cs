@@ -14,7 +14,7 @@ public class EnemyGrunt : EnemyClass
     {
         // Move enemy towards the player with a slight offset
         enemyDirection = new Vector2(player.transform.position.x - rb.transform.position.x, 5 + player.transform.position.y - rb.transform.position.y);
-        rb.velocity = enemyDirection.normalized * enemySpeed;
+        rb.linearVelocity = enemyDirection.normalized * enemySpeed;
 
         // Check if the enemy is within firing range and cooldown has elapsed
         if (Mathf.Abs(rb.transform.position.x - player.transform.position.x) <= 5 && Time.time >= nextShootTime)

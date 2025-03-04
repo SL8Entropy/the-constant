@@ -12,13 +12,13 @@ public class PlayerHealth : MonoBehaviour
     public bool immune = false;
     public GameObject[] hearts;
     private Player player;
-    private Rigidbody2D body; // Declare body
+        private Rigidbody2D body; // Declare body
 
     public GameObject gameOverScreen;
     public GameObject gameOverText;
     private void Awake()
     {
-        player = FindObjectOfType<Player>();
+        player = Object.FindFirstObjectByType<Player>();
         MaxPlayerHealth = hearts.Length;
         playerHealth = MaxPlayerHealth; // Initialize player health
         body = GetComponent<Rigidbody2D>();
@@ -53,16 +53,19 @@ public class PlayerHealth : MonoBehaviour
     {
         if (!immune && (collision.gameObject.CompareTag("enemy") || collision.gameObject.CompareTag("projectile")))
         {
+            if(player.isBashing){
+                player.EndBash(0);
+            }
             changeHealth(-1);
 
             // Adjust knockback direction based on position
             if (collision.transform.position.x < body.position.x)
             {
-                body.velocity = new Vector2(knockbackJump, knockbackJump);
+                body.linearVelocity = new Vector2(knockbackJump, knockbackJump);
             }
             else
             {
-                body.velocity = new Vector2(-knockbackJump, knockbackJump);
+                body.linearVelocity = new Vector2(-knockbackJump, knockbackJump);
             }
 
             immune = true;

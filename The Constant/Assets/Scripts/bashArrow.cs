@@ -11,7 +11,7 @@ public class BashArrow : MonoBehaviour
     private void Start()
     {
         // Find the Player script in the scene
-        player = FindObjectOfType<Player>();
+        player = Object.FindFirstObjectByType<Player>();
 
         // Instantiate the arrow and set it to inactive initially
         arrowInstance = Instantiate(arrowPrefab);

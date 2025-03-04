@@ -28,7 +28,7 @@ public class Projectile : MonoBehaviour
         rb.gravityScale = 0;
 
         // Set the velocity of the Rigidbody2D
-        rb.velocity = projectileDirection * projectileSpeed;
+        rb.linearVelocity = projectileDirection * projectileSpeed;
     }
 
     void OnCollisionEnter2D(Collision2D collision){

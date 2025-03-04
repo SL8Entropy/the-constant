@@ -18,24 +18,26 @@ public class Player : MonoBehaviour
     [SerializeField] private float dashSpeed = 15f;
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 1f;
+    [SerializeField] private float bashCooldown = 1.5f; // Cooldown duration for bash
 
     private bool isClinging = false;
     private bool canDoubleJump = false;
     private bool isDashing = false;
-    public bool isBashing { get; private set; } // Make this public for access
+    public bool isBashing { get; private set; }
     private int clingDirection = 0;
     private float clingLayerIndex;
     private float bashLayerIndex;
     private float dashTimeLeft = 0f;
     private float dashCooldownTimer = 0f;
+    private float bashCooldownTimer = 0f;
     private Vector2 bashDirection;
-    private float timeScale = 0.2f; // Time scale when bashing
+    private float timeScale = 0.2f;
 
     public Collider2D bashCol { get; private set; }
 
     private void Awake()
     {
-        playerHealth = FindObjectOfType<PlayerHealth>();
+        playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
         body = GetComponent<Rigidbody2D>();
         clingLayerIndex = Mathf.Log(clingLayer.value, 2f);
         bashLayerIndex = Mathf.Log(bashLayer.value, 2f);
@@ -49,13 +51,15 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if(!playerHealth.immune){
-                
-            HandleMovement();
-            HandleJump();
-            HandleDashInput(); // Only handle dash input when not already dashing
+            if (!playerHealth.immune)
+            {
+                HandleMovement();
+                HandleJump();
+                HandleDashInput();
             }
         }
+
+        HandleBashCooldown();
     }
 
     private void HandleMovement()
@@ -65,7 +69,7 @@ public class Player : MonoBehaviour
             float horizontalInput = Input.GetAxis("Horizontal");
             if (horizontalInput != 0 && IsGrounded())
             {
-                body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
+                body.linearVelocity = new Vector2(horizontalInput * speed, body.linearVelocity.y);
             }
         }
     }
@@ -79,28 +83,25 @@ public class Player : MonoBehaviour
                 float horizontalInput = Input.GetAxis("Horizontal");
                 if (horizontalInput * clingDirection < 0)
                 {
-                    body.velocity = new Vector2(horizontalInput * speed, jumpSpeed);
+                    body.linearVelocity = new Vector2(horizontalInput * speed, jumpSpeed);
                     canDoubleJump = true;
                 }
             }
             else if (IsGrounded())
             {
-                body.velocity = new Vector2(body.velocity.x, jumpSpeed);
+                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpSpeed);
                 canDoubleJump = true;
             }
             else if (canDoubleJump)
             {
-                body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, jumpSpeed);
+                body.linearVelocity = new Vector2(Input.GetAxis("Horizontal") * speed, jumpSpeed);
                 canDoubleJump = false;
             }
         }
 
-        if (Input.GetButtonUp("Fire2"))
+        if (Input.GetButtonUp("Fire2") && isBashing)
         {
-            if (isBashing)
-            {
-                EndBash();
-            }
+            EndBash(1);
         }
     }
 
@@ -133,7 +134,7 @@ public class Player : MonoBehaviour
         dashCooldownTimer = dashCooldown;
         body.gravityScale = 0;
         float horizontalInput = Input.GetAxis("Horizontal");
-        body.velocity = new Vector2(horizontalInput * dashSpeed, 0);
+        body.linearVelocity = new Vector2(horizontalInput * dashSpeed, 0);
     }
 
     private void EndDash()
@@ -142,29 +143,34 @@ public class Player : MonoBehaviour
         body.gravityScale = gravityScale;
     }
 
-    private void EndBash()
+    public void EndBash(int x)
     {
         isBashing = false;
         Time.timeScale = 1f;
+        if (x == 1)
+        {
+            Vector2 closestPoint = bashCol.ClosestPoint((Vector2)bashCol.transform.position + bashDirection * 10f);
+            body.MovePosition(closestPoint);
+            body.linearVelocity = bashDirection * bashSpeed;
+            canDoubleJump = true;
 
-        Vector2 closestPoint = bashCol.ClosestPoint((Vector2)bashCol.transform.position + bashDirection * 10f); // Convert Vector3 to Vector2
-        body.MovePosition(closestPoint);
-        body.velocity = bashDirection * bashSpeed;
-        canDoubleJump = true;
-        if(bashCol.gameObject.CompareTag("enemy")){
-            // Get the EnemyGrunt component from the collided object
-            EnemyClass enemy = bashCol.gameObject.GetComponent<EnemyClass>();
-
-            // If the enemy component is found, call TakeDamage()
-            if (enemy != null)
+            if (bashCol.gameObject.CompareTag("enemy"))
             {
-                enemy.TakeDamage();
+                EnemyClass enemy = bashCol.gameObject.GetComponent<EnemyClass>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage();
+                }
+            }
+            else if (bashCol.gameObject.CompareTag("projectile"))
+            {
+                Projectile projectile = bashCol.gameObject.GetComponent<Projectile>();
+                projectile.rb.linearVelocity = bashDirection * -1 * projectile.projectileSpeed * bashProjectileSpeedMod;
             }
         }
-        else if(bashCol.gameObject.CompareTag("projectile")){
-            Projectile projectile = bashCol.gameObject.GetComponent<Projectile>();
-            projectile.rb.velocity = bashDirection*-1*projectile.projectileSpeed*bashProjectileSpeedMod;
-        }
+
+
+        bashCooldownTimer = bashCooldown; // Start cooldown after bash ends
     }
 
     private bool IsGrounded()
@@ -177,7 +183,7 @@ public class Player : MonoBehaviour
         if (collision.gameObject.layer == clingLayerIndex)
         {
             isClinging = true;
-            body.velocity = Vector2.zero;
+            body.linearVelocity = Vector2.zero;
             body.gravityScale = 0;
             clingDirection = (collision.contacts[0].normal.x > 0.5f) ? -1 : 1;
         }
@@ -194,7 +200,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D col)
     {
-        if (Input.GetButton("Fire2") && col.gameObject.layer == bashLayerIndex)
+        if (Input.GetButton("Fire2") && col.gameObject.layer == bashLayerIndex && bashCooldownTimer <= 0 && !playerHealth.immune)
         {
             bashCol = col;
             Time.timeScale = timeScale;
@@ -202,6 +208,21 @@ public class Player : MonoBehaviour
 
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             bashDirection = (mousePos - (Vector2)bashCol.transform.position).normalized;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == bashLayerIndex)
+        {
+            EndBash(0);
+        }
+    }
+
+    private void HandleBashCooldown()
+    {
+        if (bashCooldownTimer > 0)
+        {
+            bashCooldownTimer -= Time.deltaTime;
         }
     }
 }
