@@ -12,6 +12,7 @@ public class EnemyStatue : EnemyClass
     public float visibleDuration = 2.5f; // Duration for which the statue is visible
     private float hideStartTime = 0f; // Time when the statue starts hiding
     private bool isHiding = false; // Whether the statue is currently hiding
+    private float xSize;
 
     void Update()
     {
@@ -20,6 +21,12 @@ public class EnemyStatue : EnemyClass
 
         // Check if the enemy should hide or come out of hiding
         HandleHiding();
+    }
+    override public void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        player = GameObject.Find("Player");
+        xSize = rb.transform.lossyScale.x;
     }
 
     // Method to handle shooting logic
@@ -79,7 +86,7 @@ public class EnemyStatue : EnemyClass
     // Method to hide the enemy
     private void Hide()
     {
-        rb.transform.localScale = new Vector3(rb.transform.localScale.x, 0, rb.transform.localScale.z);
+        rb.transform.localScale = new Vector3(0, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
         isHiding = true;
         hideStartTime = Time.time; // Start hiding timer
     }
@@ -87,7 +94,7 @@ public class EnemyStatue : EnemyClass
     // Method to unhide the enemy
     private void Unhide()
     {
-        rb.transform.localScale = new Vector3(rb.transform.localScale.x, 0.8f, rb.transform.localScale.z);
+        rb.transform.localScale = new Vector3(xSize, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
         isHiding = false;
         hideStartTime = Time.time; // Start visible timer
     }

@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     private PlayerHealth playerHealth;
 
     [SerializeField] private int speed = 10;
+    [SerializeField] private float bashProjectileSpeedMod = 2;
     [SerializeField] private int jumpSpeed = 10;
     [SerializeField] private int gravityScale = 3;
     [SerializeField] private LayerMask groundLayer;
@@ -48,9 +49,12 @@ public class Player : MonoBehaviour
         }
         else
         {
+            if(!playerHealth.immune){
+                
             HandleMovement();
             HandleJump();
             HandleDashInput(); // Only handle dash input when not already dashing
+            }
         }
     }
 
@@ -159,7 +163,7 @@ public class Player : MonoBehaviour
         }
         else if(bashCol.gameObject.CompareTag("projectile")){
             Projectile projectile = bashCol.gameObject.GetComponent<Projectile>();
-            projectile.rb.velocity = bashDirection*-1*projectile.projectileSpeed;
+            projectile.rb.velocity = bashDirection*-1*projectile.projectileSpeed*bashProjectileSpeedMod;
         }
     }
 

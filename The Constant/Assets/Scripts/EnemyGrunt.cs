@@ -20,7 +20,7 @@ public class EnemyGrunt : EnemyClass
         if (Mathf.Abs(rb.transform.position.x - player.transform.position.x) <= 5 && Time.time >= nextShootTime)
         {
             // Calculate the new position where the projectile will be instantiated
-            Vector3 spawnPosition = rb.transform.position + new Vector3(0.0f, -2f, 0.0f);
+            Vector3 spawnPosition = rb.transform.position + new Vector3(0.0f, -1f, 0.0f);
 
             // Instantiate the projectile at the new position
             projectileInstance = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);

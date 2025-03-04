@@ -15,7 +15,12 @@ public abstract class EnemyClass : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         player = GameObject.Find("Player");
     }
-
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.CompareTag("projectile")){
+            this.TakeDamage();
+        }
+    }
     public void TakeDamage()
     {
         // Reduce health by 1
