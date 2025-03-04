@@ -1,7 +1,7 @@
-# Game Project- THE CONSTANT - README
+# Game Project - README
 
 ## Overview
-This is a 2D game developed using Unity, featuring a player character with movement, combat abilities, and interactions with various enemy types. The game includes mechanics such as dashing, bashing, shooting projectiles, and enemy AI behavior.
+This is a 2D game developed using Unity, featuring a player character with movement, combat abilities, and interactions with various enemy types. The game includes mechanics such as dashing, bashing, shooting projectiles, enemy AI behavior, and a timer system.
 
 ## Features
 - *Player Movement:* Walking, jumping, dashing, and bashing mechanics.
@@ -12,6 +12,8 @@ This is a 2D game developed using Unity, featuring a player character with movem
 - *Health System:* Player health with damage and immunity mechanics.
 - *Projectile System:* Projectiles for both player and enemy attacks.
 - *Game Reset Functionality.*
+- *Game Timer:* Tracks the time from game start to reaching the finish line.
+- *Winning Condition:* Displays a win screen when the player reaches the finish line.
 
 ## File Structure
 ### *Player System*
@@ -32,11 +34,13 @@ This is a 2D game developed using Unity, featuring a player character with movem
 - PauseResume.cs - Implements pause and resume functionality.
 - cameraFollow.cs - Ensures the camera follows the player smoothly.
 - ResetButton.cs - Handles resetting the game by reloading the current scene.
+- timerScript.cs - Tracks and displays the elapsed time using TextMeshPro.
+- WInningFlag.cs - Stops the timer and displays the win screen when the player reaches the finish line.
 
 ## Installation & Setup
 1. Open Unity and load the project.
 2. Attach the scripts to the respective GameObjects in the scene.
-3. Assign prefabs and dependencies as needed (e.g., player, enemies, projectiles).
+3. Assign prefabs and dependencies as needed (e.g., player, enemies, projectiles, UI elements).
 4. Play the game in Unity Editor.
 
 ## Controls
@@ -53,7 +57,7 @@ This is a 2D game developed using Unity, featuring a player character with movem
 - Power-ups and abilities for the player.
 
 ## Credits
-Developed by Sudharshan Sambathkumar, Abhijith MI , Abhinav Raghvendra
+Developed by Sudharshan SambathKumar, Abhinav Raghavendra, Abhijit M I
 
 ---
-For any issues or feature requests, feel free to reach out!
+For any issues or feature requests, feel free to reach out!
