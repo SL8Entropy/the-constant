@@ -31,7 +31,7 @@ public class Player : MonoBehaviour
     private float dashCooldownTimer = 0f;
     private float bashCooldownTimer = 0f;
     private Vector2 bashDirection;
-    private float timeScale = 0.2f;
+    private float timeScale = 0.1f;
 
     public Collider2D bashCol { get; private set; }
 

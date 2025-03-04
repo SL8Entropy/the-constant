@@ -10,9 +10,7 @@ public class EnemyStatue : EnemyClass
     private float nextShootTime = 0f; // Time until next shot can be fired
     public float hideDuration = 2.5f; // Duration for which the statue hides
     public float visibleDuration = 2.5f; // Duration for which the statue is visible
-    private float hideStartTime = 0f; // Time when the statue starts hiding
     private bool isHiding = false; // Whether the statue is currently hiding
-    private float xSize;
 
     public Vector2 shootDirection = Vector2.right; // The direction in which the statue can shoot
 
@@ -21,14 +19,12 @@ public class EnemyStatue : EnemyClass
         if (isDying) return; 
 
         HandleShooting();
-        HandleHiding();
     }
 
     override public void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         player = GameObject.Find("Player");
-        xSize = rb.transform.lossyScale.x;
     }
 
     private void HandleShooting()
@@ -56,41 +52,9 @@ public class EnemyStatue : EnemyClass
 
         nextShootTime = Time.time + shootCooldown;
     }
-
-    private void HandleHiding()
-    {
-        if (isHiding)
-        {
-            if (Time.time >= hideStartTime + hideDuration)
-            {
-                Unhide();
-            }
-        }
-        else
-        {
-            if (Time.time >= hideStartTime + visibleDuration)
-            {
-                Hide();
-            }
-        }
-    }
-
-    private void Hide()
-    {
-        rb.transform.localScale = new Vector3(0, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
-        isHiding = true;
-        hideStartTime = Time.time;
-    }
-
-    private void Unhide()
-    {
-        rb.transform.localScale = new Vector3(xSize, rb.transform.lossyScale.y, rb.transform.lossyScale.z);
-        isHiding = false;
-        hideStartTime = Time.time;
-    }
     public override void TakeDamage()
     {
-        enemyHealth+=(-1);
+        enemyHealth-=1;
         if(enemyHealth<=0){
             Destroy(gameObject);
         }
